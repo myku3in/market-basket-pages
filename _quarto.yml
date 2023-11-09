@@ -1,0 +1,28 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "marketbasket.in.ua"
+  page-navigation: true
+  navbar:
+    left:
+      - text: "Про проєкт"
+        href: index.qmd
+      - text: "Дані" 
+        href: data.qmd
+      - text: "Аналіз"
+        href: analysis.qmd
+      - text: "Про себе" 
+        href: about.qmd
+     
+format:
+  html:
+    theme: Flatly
+    css: styles.css
+    toc: true
+    toc-location: left
+    toc-title: На цій сторінці
+
+editor: visual
+

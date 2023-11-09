@@ -1,0 +1,25 @@
+---
+page-layout: full
+---
+
+::: grid
+::: g-col-4
+![](myphoto.jpg){width="287" fig-align="left"}
+:::
+
+::: g-col-8
+Привіт,
+
+Мене звати Микола, я дата-аналітик. Освіта - магістр філософії, Києво-Могилянська Академія (2012) та магістр економіки, Київська школа економіки (2023). За допомогою інструментів дата-аналізу досліджую різноманітні теми на перетині цих галузей.
+
+Тримаймо зв'язок:
+
+[mykola.kuzin\@proton.me](mailto:mykola.kuzin@proton.me)
+
+[![Linkedin](https://i.stack.imgur.com/gVE0j.png) LinkedIn](https://www.linkedin.com/in/mykola-kuzin/)
+&nbsp;
+
+[![GitHub](https://i.stack.imgur.com/tskMh.png) GitHub](https://github.com/myku3in)
+
+:::
+:::

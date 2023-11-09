@@ -1,0 +1,274 @@
+---
+title: "Чи забезпечує прожитковий мінімум в Україні мінімальні стандарти життя"
+---
+
+## Як вираховується прожитковий мінімум
+
+```{r include = FALSE}
+library(tidyverse)
+library(scales)
+library(gt)
+library(readxl)
+library(lubridate)
+
+df <- read.csv("C:/Users/Mykola Kuzin/Desktop/R/ATB scraping/Data - CPI/tidy data/2023.09.07-2023.10.12 tidy data 2023-11-03.csv")
+df <- df |> mutate(
+  date = as_date(date),
+  prod.group = as.factor(prod.group)
+) |> select(!X)
+
+df_gr <- read.csv("C:/Users/Mykola Kuzin/Desktop/R/Market_Basket_in_ua/_scripts/datasets/prod_groups.csv")
+df_gr <- df_gr |> mutate(
+  date = as_date(date)
+) |> select(!X)
+
+df_cat <- read.csv("C:/Users/Mykola Kuzin/Desktop/R/Market_Basket_in_ua/_scripts/datasets/prod_cats.csv")
+df_cat <- df_cat |> mutate(
+  date = as_date(date)
+) |> select(!X)
+
+```
+
+Прожитковий мінімум в Україні з 1 січня 2023 офіційно становить 2,684 гривні на місяць для працездатної особи. Передбачається, що на ці гроші працездатна людина може забезпечети себе мінімальним набором харчів, непродовольчих товарів та послуг (таких як опалення, транспорт та електроенергія). Розмір прожиткового мінімуму прямо виводиться з вартості споживчого кошика.
+
+Конкретний перелік складових споживчого кошика та норми споживання визначені Постановою Кабінету Міністрів[^1] , а спосіб розрахунку вартості споживчого кошика --- окремою Методикою[^2].
+
+[^1]: «Про затвердження наборів продуктів харчування, наборів непродовольчих товарів та наборів послуг для основних соціальних і демографічних груп населення»:\
+    <https://zakon.rada.gov.ua/laws/show/780-2016-%D0%BF>
+
+[^2]: «Про затвердження Методики визначення прожиткового мінімуму»\
+    <https://zakon.rada.gov.ua/laws/show/z0281-17>
+
+```{r echo = FALSE}
+
+my_table <- read_excel("C:/Users/Mykola Kuzin/Desktop/R/ATB scraping/classified by group.xlsx")
+my_table <- my_table |> 
+  select(prod.group, food.norms) |> 
+  arrange(desc(food.norms)) |> 
+  filter(prod.group != "яйця") |> 
+  slice(seq(1, n(), 5))
+
+gt_table <- gt(my_table)
+
+gt_table |> tab_header(
+  title = md("**Норми річного споживання харчів**"),
+  subtitle = "для працездатної особи на рік, у кілограмах/ літрах"
+) |>
+  tab_footnote(
+    footnote = md("_Тут наведені деякі приклади продуктів, всього їх майже 50._"),
+    locations = cells_column_labels(columns = prod.group)
+  ) |> tab_source_note(
+  source_note = md("*Джерело*: Постанова Кабінету Міністрів № 780 від 11.10.2016")
+) |> cols_label(
+  prod.group = md("**Продукт**"),
+  food.norms = md("**Норма споживання**")
+) |> tab_options(data_row.padding = px(2))
+```
+
+Зокрема, вартість набору продуктів харчування визначається як сума вартостей споживання кожного продукту. Згідно з Методикою, ціни розраховуються Держстатом --- беруться середні споживчі ціни на окремий продукт на рівні області/ всієї України. А місячна вартість споживчого кошика і, відповідно, місячний прожитковий мінімум --- як одна дванадцята річної вартості споживчого кошика у поточних цінах.
+
+## Вартість харчового набору за актуальними цінами АТБ
+
+Порахуємо вартість харчового набору зі споживчого кошика за актуальними цінами з веб-сайту мережі супермаркетів «АТБ-Маркет». Відповідно до згаданої Методики, для початку потрібно порахувати середнє арифметичне ціни визначених категорій продуктів.
+
+```{r echo = FALSE}
+df |> filter(date == "2023-11-02") |> mutate(
+  n.goods = row_number(desc),
+  .by = prod.group
+) |>
+  group_by(prod.group) |> 
+  filter(mean(price.per.m.u) >= 180) |>
+  ggplot(aes(x = price.per.m.u, y = fct_reorder(prod.group, price.per.m.u))) +
+  labs(
+    y = NULL,
+    x = NULL
+  ) +
+  geom_boxplot() +
+   stat_summary(fun=mean, geom="point", shape=20, size=3, color="#73C6B6", fill="#73C6B6") +
+  theme_minimal()  +
+  labs(
+    title = "Діапазон цін та середнє арифметичне ціни по категоріях продуктів",
+    subtitle = "Зелена крапка показує середнє, а чорна риска - медіанне значення ціни",
+    caption = "джерело: ціни з www.atbmarket.com станом на 2 листопада 2023 року."
+  ) +
+  scale_x_continuous(labels = scales::dollar_format(prefix="₴"))
+```
+
+Для стислості у наведеному графіку показані категорії продуктів з середньою ціною більше 180 грн/ кг. Найбільший діапазон цін (інтервал між найдешевшим та найдорожчим товаром) мають продукти категорії «чай», «ковбасні вироби» та «спеції». Найбільший асортимент --- «ковбасні вироби» (43 товари), «чай» (32) та «молоко» (25). З іншого боку, від початку спостережень «яловичина», «буряки» та «оселедці» представлені, в середньому, всього одним товаром на веб-сайті мережі.
+
+Множачи середнє арифметичне ціни продуктової категорії на затверджені норми споживання, отримуємо такі значення вартості харчового набору за місяць:
+
+```{r echo = FALSE}
+norms_tbl <- read_excel("C:/Users/Mykola Kuzin/Desktop/R/ATB scraping/classified by group.xlsx")
+
+sept.prices <- df |> 
+  mutate(
+    month = month(ymd(date)),
+    price.per.m.u = if_else(prod.group == "яйця", price.per.m.u/ 10, price.per.m.u)
+    ) |>
+  filter(month == 9) |> 
+  summarise(
+    avg.price.septem = round(mean(price.per.m.u), 1),
+    n.prod.sept = round(n() / max(dense_rank(date))),
+    .by = c(month, prod.group)
+    ) |> 
+  arrange(desc(avg.price.septem)) |>
+  left_join(norms_tbl, join_by(prod.group)) |>
+  mutate(
+   month.expend.septem = round((avg.price.septem * food.norms) / 12, 1),
+   prod.group2 = NULL
+  ) |> arrange(desc(month.expend.septem))
+
+octob.prices <- df |> 
+  mutate(
+    month = month(ymd(date)),
+    price.per.m.u = if_else(prod.group == "яйця", price.per.m.u/ 10, price.per.m.u)
+    ) |>
+  filter(month == 10) |> 
+  summarise(
+    avg.price.octob = round(mean(price.per.m.u), 1),
+    n.prod.octob = round(n() / max(dense_rank(date))),
+    .by = c(month, prod.group)
+    ) |> 
+  arrange(desc(avg.price.octob)) |>
+  left_join(norms_tbl, join_by(prod.group)) |>
+  mutate(
+  month.expend.octob = round((avg.price.octob * food.norms) / 12, 1),
+   prod.group2 = NULL
+  ) |> arrange(desc(month.expend.octob))
+
+food.set.prices <- left_join(sept.prices, octob.prices, join_by(prod.group, food.norms)) |> select(!c(month.x, month.y)) |> select(prod.group, food.norms, avg.price.septem, month.expend.septem, n.prod.sept, avg.price.octob, month.expend.octob, n.prod.octob)
+
+food.set.prices |> 
+  gt(rowname_col = "prod.group") |>
+  tab_header(
+    title =  md("**Фактичні витрати на продукти харчового набору**"),
+    subtitle = "За середньомісячними цінами мережі супермаркетів АТБ"
+  ) |> 
+  tab_spanner(
+    label = md("**Витрати у вересені**"),
+    columns = c(avg.price.septem, month.expend.septem, n.prod.sept)
+  ) |>
+  tab_spanner(
+    label = md("**Витрати у жовтні**"),
+    columns = c(avg.price.octob, month.expend.octob, n.prod.octob)
+  ) |> 
+  cols_label(
+    prod.group = "Категорія продуктів",
+    food.norms = html("Річні норми<br>споживання"),
+    avg.price.septem = html("Середня<br>ціна"),
+    month.expend.septem = "Витрати",
+    n.prod.sept = html("Продуктів<br>у категорії"),
+    avg.price.octob = html("Середня<br>ціна"),
+    month.expend.octob = "Витрати",
+    n.prod.octob = html("Продуктів<br>у категорії")
+  ) |>
+  tab_footnote(
+    footnote = "У кілограмах або літрах, залежно від типу продукту. Яйця - у штуках",
+    locations = cells_column_labels(columns = food.norms)) |>
+  grand_summary_rows(
+    columns = c(month.expend.septem, month.expend.octob),
+    fns = list("Вартість харчового набору" = ~ sum(.))
+  ) |> 
+  tab_options(data_row.padding = px(2.2)) |>
+  cols_align(align = "center",
+             columns = !prod.group) |>
+   tab_style(
+    locations = cells_grand_summary(),
+    style = cell_text(weight = "bold")) |>
+  tab_stubhead(label = "Категорія продуктів") |>
+  tab_style(
+    location = cells_column_labels(!food.norms),
+    style = cell_text(v_align = "middle")
+  )
+  
+
+
+```
+
+Кілька пояснень до цієї таблиці: колонка «витрати» показує фактичну місячну вартість продуктів кожної категорії, порахованої відповідно до затвердженої норми місячного споживання (як 1/12 річних норм споживання). Колонка «продуктів у категорії» --- технічна колонка, вона показує кількість товарів у категорії, доступних на веб-сайті мережі в середньому на місяць, з яких було розраховано середнє арифметичне ціни для цієї категорії. Видно, що по деяких категоріях продуктів доступний лише один товар: зокрема, звертає увагу «яловичина» з ціною більше 460 грн/кг, що є вищою за середньоринкову. Вищу ціну тут можна пояснити тим, що через веб-сайт продаються фасовані товари, готові до відправки споживачеві.
+
+Відповідно до наведених розрахунків, витрати на харчовий набір за затвердженими нормами складають 4,425.5 грн у вересні і 4,566.3 грн у жовтні 2023 року. Таким чином, витрати лише на харчові продукти перевищують поточний прожитковий мінімум більш як на 65%. Ситуацію не змінить навіть те, якщо купувати найдешевші продукти в кожній категорії: місячні витрати на набори продуктів харчування становитимуть тоді 3,470.2 грн та 3587.3 грн у версні та жовтні відповідно --- що є вищим за прожитковий мінімум приблизно на 30%.
+
+Незважаючи на те, що для цього аналізу взяті ціни лише з однієї продовольчої мережі, «АТБ-Маркет» є найбільшою мережею продовольчих супермаркетів в Україні, що до того ж працює у ніші дискаунтерів, --- тобто загалом націлена на нижчі ціни на продукти, ніж в середньому на ринку.
+
+## Висновок
+
+Офіційний прожитковий мінімум в Україні не дозволяє забезпечити людину мінімальним стандартами життя, що декларуються державою. Більше того, цих грошей не вистачає навіть для купівлі продуктів харчування у визначених нормах за мінімальними цінами мережі дискаунтерів «АТБ-Маркет».
+
+```{r include = FALSE}
+min.price.sep <- df |> mutate(
+  month = month(ymd(date))
+) |> filter(month == 9) |>
+  summarise(
+    min.price.sep = min(price.per.m.u),
+    .by = prod.group
+  )
+
+min.price.oct <- df |> mutate(
+  month = month(ymd(date))
+) |> filter(month == 10) |>
+  summarise(
+    min.price.oct = min(price.per.m.u),
+    .by = prod.group
+  )
+
+left_join(min.price.oct, min.price.sep, join_by(prod.group)) |> 
+  left_join(norms_tbl, join_by(prod.group)) |>
+  select(!prod.group2) |>
+  mutate(
+    min.exp.sep = min.price.sep * food.norms / 12,
+    min.exp.oct = min.price.oct * food.norms / 12
+  ) |> summarise(
+    tot.exp.sep = sum(min.exp.sep),
+    tot.exp.oct = sum(min.exp.oct)
+  )
+```
+
+```{r include = FALSE}
+df |> count(prod.group) |> arrange(desc(n)) |> summarize(avg.number = n / 8, 
+                                                         .by = prod.group)
+
+df |> filter(prod.group == "кондитерські вироби") |> View()
+
+# середнє асортименту в атб
+df |> count(date, prod.group) |> summarize(
+  avg.goods.n = round(mean(n)),
+  .by = prod.group
+) |> arrange(desc(avg.goods.n))
+```
+
+```{r include = FALSE}
+ggplot(df_cat, aes(x = date, y = CPI)) +
+  geom_line(aes(color = prod.cat), linewidth = 1.5) +
+  geom_point(aes(color = prod.cat), size = 2, shape = 1) +
+  labs(
+    title = "Зміна вартості категорій продовольчих товарів споживчого набору",
+    subtitle = "Щотижневі дані, базовий період 7 вересня 2023 року",
+    caption = "джерело: ціни ~380 товарних позицій з www.atbmarket.com",
+    x = NULL
+  ) +
+  theme_minimal() +
+  scale_y_continuous("% зміни ціни", labels = percent) +
+  scale_x_continuous(breaks = df_cat$date, labels = date_format("%d %b")) +
+  scale_color_manual(values =c("овочі та фрукти" = "#A569BD", "яйця" = "#ABEBC6", 
+                              "м'ясо та м'ясопродукти, птиця" = "#73C6B6", "бакалія" = "#5DADE2",
+                              "кондитерські вироби" = "#D7DBDD", "молоко, молочні продукти" = "#F7DC6F", 
+                              "риба" = "#F39C12"), name = "Категорії товарів") +
+  theme(axis.title = element_text(size = 12),
+        legend.title = element_text(size = 8), 
+        legend.text = element_text(size = 9),
+        title = element_text(size = 10),
+        axis.title.y = element_text(size = 9),
+        axis.text.x = element_text(size = 7),
+        legend.key.height = unit(.4, 'cm'),
+        legend.spacing.x = unit(.3, "cm"),
+        plot.caption = element_text(size = 7, vjust = -1)
+        ) +
+  geom_text(data = df_cat |> 
+              filter(date == "2023-10-19" | date == "2023-09-21"),  
+            aes(label = percent(round(CPI, 3))), 
+            check_overlap = TRUE,
+            size = 2.5,
+            nudge_y = .03)
+```
