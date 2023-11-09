@@ -4,6 +4,7 @@ project:
 
 website:
   title: "marketbasket.in.ua"
+  favicon: myfavicon.png
   page-navigation: true
   navbar:
     left:
