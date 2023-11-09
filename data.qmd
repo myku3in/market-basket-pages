@@ -26,7 +26,7 @@ df$date <- format(df$date, "%Y-%m-%d")
 
 Кількість представлених у ритейлера товарів змінююється щотижня, відповідно, змінюється й кількість щотижневих спостережень:
 
-```{r echo = TRUE, results = 'hold', warning = FALSE, class.output = "bg-light text-dark"}
+```{r echo = TRUE, results = 'hold', warning = FALSE}
 
 as_tibble(df) |> count(date) |> arrange(date) |> 
   rename("Кількість позицій" = n, "Дата збору цін" = date) |> head(n = 5)
