@@ -45,7 +45,7 @@ as_tibble(df) |> count(date) |> arrange(date) |>
 
 Виглядає це так:
 
-```{r echo = FALSE, results = 'hold', warning = FALSE, class.output = "bg-light text-dark"}
+```{r echo = FALSE, results = 'hold', warning = FALSE}
 
 as_tibble(df) |> 
   arrange(prod.group) |> 
