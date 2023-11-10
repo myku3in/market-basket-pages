@@ -8,9 +8,9 @@ website:
   description: "Ринкова вартість споживчого кошика в Україні"
   image: foodset.png
   favicon: myfavicon.png
-  open-graph: true
+  open-graph: 
+    image: foodset.png
   page-navigation: true
-  twitter-card: true
   navbar:
     left:
       - text: "Про проєкт"
@@ -21,6 +21,9 @@ website:
         href: analysis.qmd
       - text: "Про себе" 
         href: about.qmd
+  search:
+    location: navbar
+    type: overlay
      
 format:
   html:
