@@ -7,6 +7,7 @@ website:
   description: "Ринкова вартість споживчого кошика в Україні"
   image: foodset.png
   favicon: myfavicon.png
+  open-graph: true
   page-navigation: true
   twitter-card: true
   navbar:
