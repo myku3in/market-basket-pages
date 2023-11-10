@@ -7,7 +7,7 @@ website:
   description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
   favicon: myfavicon.png
   open-graph:
-    image: foodset.png
+    image: "/docs/tools.png"
   twitter-card: true
   page-navigation: true
   navbar:
