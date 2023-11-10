@@ -7,6 +7,7 @@ website:
   description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
   favicon: myfavicon.png
   image: preview.png
+  google-analytics: G-WJ6WXWXRH3
   open-graph:
     image: "docs/preview.png"
     description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
