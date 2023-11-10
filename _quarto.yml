@@ -5,9 +5,9 @@ project:
 website:
   site-url: https://www.marketbasket.in.ua
   description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
-  image: foodset.png
   favicon: myfavicon.png
-  open-graph: true
+  open-graph:
+    image: foodset.png
   twitter-card: true
   page-navigation: true
   navbar:
