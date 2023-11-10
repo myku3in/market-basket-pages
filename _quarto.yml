@@ -3,13 +3,12 @@ project:
   output-dir: docs
 
 website:
-  title: "marketbasket.in.ua"
   site-url: https://www.marketbasket.in.ua
-  description: "Ринкова вартість споживчого кошика в Україні"
+  description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
   image: foodset.png
   favicon: myfavicon.png
-  open-graph: 
-    image: foodset.png
+  open-graph: true
+  twitter-card: true
   page-navigation: true
   navbar:
     left:
