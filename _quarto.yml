@@ -4,6 +4,7 @@ project:
 
 website:
   title: "marketbasket.in.ua"
+  site-url: https://www.marketbasket.in.ua
   description: "Ринкова вартість споживчого кошика в Україні"
   image: foodset.png
   favicon: myfavicon.png
