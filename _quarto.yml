@@ -3,11 +3,12 @@ project:
   output-dir: docs
 
 website:
+  site-url: "https://marketbasket.in.ua/"
   description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
   favicon: myfavicon.png
   image: preview.png
   open-graph:
-    image: "https://github.com/myku3in/market-basket-pages/blob/main/docs/preview.png"
+    image: "docs/preview.png"
     description: "В цьому проєкті я налаштовую автоматичний збір цін на визначені державою групи товарів та послуг, що складають споживчий кошик"
   twitter-card: true
   page-navigation: true
